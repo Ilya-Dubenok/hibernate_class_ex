@@ -30,12 +30,12 @@
             <version>42.6.0</version>
         </dependency>
 
-
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-            <version>6.0.8</version>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>5.6.14.Final</version>
         </dependency>
+
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

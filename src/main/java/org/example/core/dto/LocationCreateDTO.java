@@ -1,5 +1,9 @@
 package org.example.core.dto;
 
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LocationCreateDTO {
 
     private String address;

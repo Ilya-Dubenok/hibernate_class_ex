@@ -4,22 +4,23 @@ import java.util.List;
 
 public class DepartmentDTO {
 
-    private  long id;
+    private  Long id;
 
     private  String name;
 
     private  String phoneNum;
 
-    private  long locationId;
+    private  Long locationId;
+
+    private Long parent;
 
     private List<Long> children;
 
-    private Long parent;
 
     public DepartmentDTO() {
     }
 
-    public DepartmentDTO(long id, String name, String phoneNum, long locationId, List<Long> children, Long parent) {
+    public DepartmentDTO(Long id, String name, String phoneNum, Long locationId, List<Long> children, Long parent) {
         this.id = id;
         this.name = name;
         this.phoneNum = phoneNum;
@@ -28,7 +29,7 @@ public class DepartmentDTO {
         this.parent = parent;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -52,7 +53,7 @@ public class DepartmentDTO {
         this.phoneNum = phoneNum;
     }
 
-    public long getLocationId() {
+    public Long getLocationId() {
         return locationId;
     }
 

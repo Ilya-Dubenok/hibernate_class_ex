@@ -1,34 +1,38 @@
 package org.example.core.dto;
 
-import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"id"}, allowGetters = true)
 public class DepartmentCreateDTO {
 
+
+    private Long id;
 
     private String name;
 
     private String phoneNum;
 
-    private long locationId;
+    private Long locationId;
 
     private Long parent_id;
 
-    private List<Long> children;
 
     public DepartmentCreateDTO() {
     }
 
-    public DepartmentCreateDTO(String name, String phoneNum, long locationId, Long parent_id, List<Long> children) {
+    public DepartmentCreateDTO(String name, String phoneNum, Long locationId, Long parent_id) {
         this.name = name;
         this.phoneNum = phoneNum;
         this.locationId = locationId;
         this.parent_id = parent_id;
-        this.children = children;
     }
 
     public String getName() {
         return name;
     }
+
+
 
     public void setName(String name) {
         this.name = name;
@@ -42,11 +46,11 @@ public class DepartmentCreateDTO {
         this.phoneNum = phoneNum;
     }
 
-    public long getLocationId() {
+    public Long getLocationId() {
         return locationId;
     }
 
-    public void setLocationId(long locationId) {
+    public void setLocationId(Long locationId) {
         this.locationId = locationId;
     }
 
@@ -58,11 +62,12 @@ public class DepartmentCreateDTO {
         this.parent_id = parent_id;
     }
 
-    public List<Long> getChildren() {
-        return children;
+    public Long getId() {
+        return id;
     }
 
-    public void setChildren(List<Long> children) {
-        this.children = children;
+    public void setId(Long id) {
+        this.id = id;
     }
+
 }
