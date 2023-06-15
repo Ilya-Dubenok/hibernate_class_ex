@@ -1,8 +1,8 @@
 package org.example.service.api;
 
 import org.example.core.dto.DepartmentCreateDTO;
-import org.example.core.dto.DepartmentDTO;
 import org.example.core.dto.DepartmentFindDTO;
+import org.example.core.dto.DepartmentUpdateDTO;
 import org.example.dao.entity.Department;
 
 import java.util.List;
@@ -15,10 +15,12 @@ public interface IDepartmentService {
 
     Department save(DepartmentCreateDTO departmentCreateDTO);
 
+    Department update(DepartmentUpdateDTO departmentUpdateDTO);
+
     List<Department> findChildren(Long parentId);
 
+    boolean setInactive(Long id);
 
-    List<DepartmentDTO> save(List<DepartmentCreateDTO> list);
 
 
 }

@@ -1,8 +1,6 @@
 package org.example.service;
 
-import org.example.core.dto.DepartmentCreateDTO;
-import org.example.core.dto.DepartmentDTO;
-import org.example.core.dto.DepartmentFindDTO;
+import org.example.core.dto.*;
 import org.example.dao.api.IDepartmentDao;
 import org.example.dao.entity.Department;
 import org.example.dao.entity.Location;
@@ -46,9 +44,79 @@ public class DepartmentServiceImpl implements IDepartmentService {
 
     @Override
     public Department save(DepartmentCreateDTO departmentCreateDTO) {
+        Long parentId = departmentCreateDTO.getParent_id();
+        if (parentId != null && departmentDao.findNotActive(parentId) != null) {
+
+            throw new IllegalArgumentException("Указан deprecated id");
+        }
 
         Department department = convertToDepartment(departmentCreateDTO);
         return departmentDao.save(department);
+    }
+
+    @Override
+    public Department update(DepartmentUpdateDTO departmentUpdateDTO) {
+        Long id = departmentUpdateDTO.getId();
+        Department parent;
+        Department toUpdate = departmentDao.find(id);
+        Location location;
+
+        String newName = departmentUpdateDTO.getName();
+        String newPhone = departmentUpdateDTO.getPhoneNum();
+
+        if (toUpdate == null) {
+
+            throw new IllegalArgumentException("Указан неверный id");
+
+        }
+
+        Long parentId = departmentUpdateDTO.getParent_id();
+
+
+        if (parentId != null) {
+            parent = departmentDao.find(parentId);
+            if (parent == null) {
+
+                throw new IllegalArgumentException("Не найден id для родителя");
+            }
+
+            if (id.equals(parentId)) {
+                throw new IllegalArgumentException("Хватит баловаться!");
+            }
+
+            if (departmentDao.findChildren(id).stream().anyMatch(x -> x.getId().equals(parentId))) {
+
+                throw new IllegalArgumentException("Ну зачем??");
+            }
+
+            toUpdate.setParent(parent);
+
+        }
+
+        Long locationId = departmentUpdateDTO.getLocationId();
+
+        if (locationId != null) {
+            location = LocationServiceFactory.getInstance().find(locationId);
+            if (location == null) {
+
+                throw new IllegalArgumentException("Такой локации не существует");
+            }
+
+            toUpdate.setLocation(location);
+
+        }
+
+        if (newName != null) {
+            toUpdate.setName(newName);
+        }
+
+        if (newPhone != null) {
+            toUpdate.setPhone(newPhone);
+        }
+
+        return departmentDao.update(toUpdate);
+
+
     }
 
     @Override
@@ -57,10 +125,15 @@ public class DepartmentServiceImpl implements IDepartmentService {
     }
 
     @Override
-    public List<DepartmentDTO> save(List<DepartmentCreateDTO> list) {
-        return null;
-    }
+    public boolean setInactive(Long id) {
+        boolean hasChildren = departmentDao.hasChildren(id);
+        if (hasChildren) {
+            throw new IllegalArgumentException("У него же есть дети!");
+        }
 
+        return departmentDao.setInactive(id);
+
+    }
 
     private static Department convertToDepartment(DepartmentCreateDTO departmentCreateDTO) {
         Location location;

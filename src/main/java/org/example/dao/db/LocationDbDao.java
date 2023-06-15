@@ -1,7 +1,5 @@
 package org.example.dao.db;
 
-import org.example.core.dto.LocationCreateDTO;
-import org.example.core.dto.LocationDTO;
 import org.example.dao.api.ILocationDao;
 import org.example.dao.entity.Location;
 import org.example.dao.utils.HibernateUtil;
@@ -59,11 +57,6 @@ public class LocationDbDao implements ILocationDao {
         }
 
         return location;
-    }
-
-    @Override
-    public List<LocationDTO> save(List<LocationCreateDTO> list) {
-        return null;
     }
 
 

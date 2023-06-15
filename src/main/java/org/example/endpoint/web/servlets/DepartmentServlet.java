@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.example.core.dto.DepartmentCreateDTO;
 import org.example.core.dto.DepartmentDTO;
 import org.example.core.dto.DepartmentFindDTO;
+import org.example.core.dto.DepartmentUpdateDTO;
 import org.example.dao.entity.Department;
 import org.example.service.api.IDepartmentService;
 import org.example.endpoint.web.servlets.utils.EntityToDtoConverter;
@@ -57,13 +58,26 @@ public class DepartmentServlet extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
 
         PrintWriter writer = resp.getWriter();
-        if (null != req.getParameter("id")) {
-            //TODO ПРОВЕРКИ ID И ЧЕГО_НИБУДЬ ЕЩЕ ХЗ ЧЕГО УЖЕ ЧАС НОЧИ БЛЯТЬ ЗАВТРА НА РАБОТУ
-            Department department = service.find(Long.valueOf(req.getParameter("id")));
-            DepartmentDTO res = EntityToDtoConverter.convertToDepartmentDTO(department);
-            String resultToSend = objectMapper.writeValueAsString(res);
+        String id = req.getParameter("id");
+        if (null != id) {
+            try {
 
-            writer.write(resultToSend);
+                Department department = service.find(Long.valueOf(id));
+                DepartmentDTO res = EntityToDtoConverter.convertToDepartmentDTO(department);
+                String resultToSend = objectMapper.writeValueAsString(res);
+
+                writer.write(resultToSend);
+
+            } catch (
+                    NumberFormatException e
+            ) {
+                resp.sendError(400, "Хреновое значение id");
+
+            } catch (IllegalArgumentException e) {
+                resp.sendError(400, e.getMessage());
+
+            }
+
             return;
 
         }
@@ -86,5 +100,71 @@ public class DepartmentServlet extends HttpServlet {
         String resultToSend = objectMapper.writeValueAsString(res);
 
         writer.write(resultToSend);
+    }
+
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
+        String id = req.getParameter("id");
+        if (null == id) {
+
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Не передано id");
+            return;
+
+        }
+
+        long identer;
+        boolean deleted;
+
+        try {
+
+            identer = Long.parseLong(id);
+            deleted = service.setInactive(identer);
+
+        } catch (NumberFormatException e) {
+
+            resp.sendError(400, "Хреновое id");
+            return;
+        } catch (IllegalArgumentException e) {
+            resp.sendError(400, e.getMessage());
+            return;
+        }
+
+
+        if (deleted) {
+            resp.setStatus(HttpServletResponse.SC_OK);
+
+        } else {
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        }
+
+
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
+        DepartmentUpdateDTO departmentUpdateDTO = objectMapper.readValue(req.getInputStream(), DepartmentUpdateDTO.class);
+        PrintWriter writer = resp.getWriter();
+
+        DepartmentDTO departmentDTO;
+
+
+        try {
+            Department department = service.update(departmentUpdateDTO);
+            departmentDTO = EntityToDtoConverter.convertToDepartmentDTO(department);
+
+        } catch (IllegalArgumentException e) {
+
+            resp.sendError(400, e.getMessage());
+            return;
+        }
+
+        String resultToSend = objectMapper.writeValueAsString(departmentDTO);
+
+        writer.write(resultToSend);
+
+
     }
 }

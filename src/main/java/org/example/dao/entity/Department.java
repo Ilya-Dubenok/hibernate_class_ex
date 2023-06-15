@@ -1,6 +1,8 @@
 package org.example.dao.entity;
 
 
+import org.hibernate.annotations.ColumnDefault;
+
 import javax.persistence.*;
 import java.util.Objects;
 
@@ -17,16 +19,6 @@ public class Department {
     @Column(unique = true, nullable = false)
     private String name;
 
-    public Department() {
-    }
-
-    public Department(String name, Department parent, String phone, Location location) {
-        this.name = name;
-        this.parent = parent;
-        this.phone = phone;
-        this.location = location;
-    }
-
     @JoinTable(
             name = "department_relations",
             joinColumns = @JoinColumn(name = "child_id"),
@@ -41,6 +33,22 @@ public class Department {
     @ManyToOne
     @JoinColumn(nullable = false)
     private Location location;
+
+    @Column(name = "active", nullable = false)
+    @ColumnDefault("true")
+    private Boolean isActive = true;
+
+
+    public Department() {
+    }
+
+    public Department(String name, Department parent, String phone, Location location) {
+        this.name = name;
+        this.parent = parent;
+        this.phone = phone;
+        this.location = location;
+    }
+
 
 
     public Long getId() {
@@ -81,6 +89,14 @@ public class Department {
 
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
     }
 
     @Override
