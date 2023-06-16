@@ -12,6 +12,9 @@ import java.util.List;
 public class EntityToDtoConverter {
 
     public static DepartmentCreateDTO convertToDepartmentCreateDTO(Department department) {
+        if (department == null) {
+            return new DepartmentCreateDTO();
+        }
 
         DepartmentCreateDTO res = new DepartmentCreateDTO(
                 department.getName(),
@@ -25,6 +28,10 @@ public class EntityToDtoConverter {
     }
 
     public static DepartmentDTO convertToDepartmentDTO(Department department) {
+        if (department == null) {
+            return new DepartmentDTO();
+        }
+
         DepartmentDTO res = new DepartmentDTO();
 
         res.setId(department.getId());

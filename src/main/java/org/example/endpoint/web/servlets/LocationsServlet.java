@@ -60,9 +60,9 @@ public class LocationsServlet extends HttpServlet {
             return;
         }
 
-        Long id;
+        long id;
         try {
-            id = Long.valueOf(req.getParameter("id"));
+            id = Long.parseLong(req.getParameter("id"));
         } catch (NumberFormatException e) {
             resp.sendError(400, "bad id format");
             return;
@@ -77,6 +77,28 @@ public class LocationsServlet extends HttpServlet {
         }
 
         String result = objectMapper.writeValueAsString(res);
+
+        writer.write(result);
+
+
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
+        PrintWriter writer = resp.getWriter();
+
+        LocationDTO locationDTO = objectMapper.readValue(req.getInputStream(), LocationDTO.class);
+
+        try {
+            Location location = service.update(locationDTO);
+            locationDTO = new LocationDTO(location.getId(), location.getName());
+        } catch (IllegalArgumentException e) {
+            resp.sendError(400, e.getMessage());
+            return;
+        }
+
+        String result = objectMapper.writeValueAsString(locationDTO);
 
         writer.write(result);
 

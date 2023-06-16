@@ -59,6 +59,29 @@ public class LocationDbDao implements ILocationDao {
         return location;
     }
 
+    @Override
+    public Location update(Location update) {
+        EntityManager em = HibernateUtil.getEntityManager();
+        em.getTransaction().begin();
+
+        try {
+            Location res = em.merge(update);
+            em.getTransaction().commit();
+            return res;
+        } catch (
+                PersistenceException e
+        ) {
+            if (e.getCause().getClass().equals(ConstraintViolationException.class)) {
+                throw new IllegalArgumentException("Задано не уникальное новое имя для локации!\n" + e.getMessage());
+            } else {
+                throw e;
+            }
+        } finally {
+            em.close();
+        }
+
+    }
+
 
     public static ILocationDao getInstance() {
         return Holder.instance;

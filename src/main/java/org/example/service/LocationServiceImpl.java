@@ -1,6 +1,7 @@
 package org.example.service;
 
 import org.example.core.dto.LocationCreateDTO;
+import org.example.core.dto.LocationDTO;
 import org.example.dao.api.ILocationDao;
 import org.example.dao.entity.Location;
 import org.example.service.api.ILocationService;
@@ -25,6 +26,20 @@ public class LocationServiceImpl implements ILocationService {
 
         Location location = convertToLocation(locationCreateDTO);
         return locationDao.save(location);
+
+    }
+
+    @Override
+    public Location update(LocationDTO dto) {
+        Long id = dto.getId();
+        Location update = locationDao.find(id);
+        if (update == null) {
+            throw new IllegalArgumentException("Указан неверный id");
+        }
+
+        update.setName(dto.getAddress());
+        return locationDao.update(update);
+
 
     }
 

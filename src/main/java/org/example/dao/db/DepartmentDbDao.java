@@ -110,18 +110,45 @@ public class DepartmentDbDao implements IDepartmentDao {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Department> criteria = cb.createQuery(Department.class);
         Root<Department> root = criteria.from(Department.class);
-        List<Predicate> restrictions = new ArrayList<>();
-        restrictions.add(
+        List<Predicate> globalRestrictions = new ArrayList<>();
+        globalRestrictions.add(
                 cb.equal(root.get("isActive"), true)
         );
 
         if (filters != null && filters.size() > 0) {
-            restrictions.add(
-                    root.get("name").in(filters)
-            );
+            Predicate likeRestriction = null;
+
+            boolean needAnother = false;
+
+            for (String filter : filters) {
+
+                Predicate likeToFilterStripAndToLower = cb.like(
+                        cb.lower(cb.function(
+                                "REPLACE", String.class, root.get("name"),
+                                cb.literal(" "),
+                                cb.literal(""))),
+
+                        filter.toLowerCase().replaceAll(" ","")
+                );
+
+                if (needAnother) {
+
+                    likeRestriction = cb.or(
+                            likeRestriction,
+                            likeToFilterStripAndToLower
+                    );
+
+                } else {
+                    likeRestriction = likeToFilterStripAndToLower;
+                    needAnother = true;
+                }
+            }
+
+            globalRestrictions.add(likeRestriction);
+
         }
 
-        criteria.where(restrictions.toArray(new Predicate[0]));
+        criteria.where(globalRestrictions.toArray(new Predicate[0]));
 
         List<Department> resultList = em.createQuery(criteria).getResultList();
         em.close();
@@ -174,6 +201,27 @@ public class DepartmentDbDao implements IDepartmentDao {
         } finally {
             em.close();
         }
+
+//        EntityManager em = HibernateUtil.getEntityManager();
+//        em.getTransaction().begin();
+//
+//        CriteriaBuilder cb = em.getCriteriaBuilder();
+//        CriteriaUpdate<Department> criteriaUpdate = cb.createCriteriaUpdate(Department.class);
+//        Root<Department> root = criteriaUpdate.from(Department.class);
+//        criteriaUpdate
+//                .set("name", toUpdate.getName())
+//                .set("parent", toUpdate.getParent())
+//                .set("location", toUpdate.getLocation())
+//                .set("phone", toUpdate.getPhone())
+//                .where(
+//                        cb.equal(root.get("id"),toUpdate.getId())
+//                );
+//
+//        em.createQuery(criteriaUpdate).executeUpdate();
+//        em.getTransaction().commit();
+//        em.close();
+//
+//        return toUpdate;
 
 
     }

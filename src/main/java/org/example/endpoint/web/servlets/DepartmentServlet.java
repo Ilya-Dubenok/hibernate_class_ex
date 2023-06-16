@@ -145,8 +145,9 @@ public class DepartmentServlet extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
-        DepartmentUpdateDTO departmentUpdateDTO = objectMapper.readValue(req.getInputStream(), DepartmentUpdateDTO.class);
         PrintWriter writer = resp.getWriter();
+
+        DepartmentUpdateDTO departmentUpdateDTO = objectMapper.readValue(req.getInputStream(), DepartmentUpdateDTO.class);
 
         DepartmentDTO departmentDTO;
 

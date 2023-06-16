@@ -9,5 +9,5 @@ public interface ILocationDao {
     Location save(Location location);
 
 
-
+    Location update(Location update);
 }

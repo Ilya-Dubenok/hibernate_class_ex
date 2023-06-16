@@ -2,7 +2,6 @@ package org.example;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.example.core.dto.DepartmentUpdateDTO;
 import org.example.dao.api.IDepartmentDao;
 import org.example.dao.db.DepartmentDbDao;
 import org.example.dao.entity.Department;
@@ -10,6 +9,8 @@ import org.example.service.api.IDepartmentService;
 import org.example.service.api.ILocationService;
 import org.example.service.factory.DepartmentServiceFactory;
 import org.example.service.factory.LocationServiceFactory;
+
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws JsonProcessingException {
@@ -58,14 +59,23 @@ public class Main {
 //
 //        boolean success = departmentService.setInactive(4L);
 //        System.out.println(success);
-        DepartmentUpdateDTO departmentUpdateDTO = new DepartmentUpdateDTO();
-        departmentUpdateDTO.setId(1L);
-        departmentUpdateDTO.setLocationId(3L);
-        departmentUpdateDTO.setPhoneNum("6565");
-        Department department = departmentService.update(
-                departmentUpdateDTO
+//        DepartmentUpdateDTO departmentUpdateDTO = new DepartmentUpdateDTO();
+//        departmentUpdateDTO.setName("NewFinance");
+//        departmentUpdateDTO.setId(2L);
+//        departmentUpdateDTO.setLocationId(2L);
+//        departmentUpdateDTO.setPhoneNum("0003");
+//        departmentUpdateDTO.setParent_id(1L);
+//        Department department = departmentService.update(
+//                departmentUpdateDTO
+//
+//        );
+//        System.out.println(department);
 
+        List<Department> res = departmentDao.findAll(
+                List.of( "fakedepchild","","newFinance ")
         );
+        System.out.println(res);
+
 //        boolean hasChildren = departmentDao.hasChildren(18L);
 //        System.out.println(hasChildren);
 
