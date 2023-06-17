@@ -2,6 +2,9 @@ package org.example;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.example.core.dto.DepartmentCreateDTO;
+import org.example.core.dto.DepartmentUpdateDTO;
+import org.example.core.dto.LocationCreateDTO;
 import org.example.dao.api.IDepartmentDao;
 import org.example.dao.db.DepartmentDbDao;
 import org.example.dao.entity.Department;
@@ -10,46 +13,63 @@ import org.example.service.api.ILocationService;
 import org.example.service.factory.DepartmentServiceFactory;
 import org.example.service.factory.LocationServiceFactory;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class Main {
     public static void main(String[] args) throws JsonProcessingException {
 
-
-
-        ILocationService instance = LocationServiceFactory.getInstance();
-//        instance.save(
-//                new LocationCreateDTO("Minsk")
-//        );
-//        instance.save(
-//                new LocationCreateDTO("Gomel")
-//        );
-//        instance.save(
-//                new LocationCreateDTO("Gdansk")
-//        );
+        IDepartmentDao departmentDao = DepartmentDbDao.getInstance();
 
         IDepartmentService departmentService = DepartmentServiceFactory.getInstance();
 
-        IDepartmentDao departmentDao = DepartmentDbDao.getInstance();
+        ILocationService instance = LocationServiceFactory.getInstance();
+        instance.save(
+                new LocationCreateDTO("Minsk")
+        );
+        instance.save(
+                new LocationCreateDTO("Gomel")
+        );
+        instance.save(
+                new LocationCreateDTO("Gdansk")
+        );
 
-//        Stream.of(
-//                new DepartmentCreateDTO(
-//                        "Directory", "000", 1L, null
-//                ),
-//                new DepartmentCreateDTO(
-//                        "Finance", "001", 2L, 1L
-//                ),
-//                new DepartmentCreateDTO(
-//                        "Accounting", "003", 3L, 1L
-//                ),
-//                new DepartmentCreateDTO(
-//                        "FakeDep", "004", 1L, null
-//                ),
-//                new DepartmentCreateDTO(
-//                        "FakeDepChild", "005", 2L, 4L
-//                )
+
+
+        Stream.of(
+                new DepartmentCreateDTO(
+                        "Directory", "000", 1L, null
+                ),
+                new DepartmentCreateDTO(
+                        "Finance", "001", 2L, 1L
+                ),
+                new DepartmentCreateDTO(
+                        "Accounting", "003", 3L, 1L
+                ),
+                new DepartmentCreateDTO(
+                        "FakeDep", "004", 1L, null
+                ),
+                new DepartmentCreateDTO(
+                        "FakeDepChild", "005", 2L, 4L
+                )
+
+        ).forEach(departmentService::save);
+
+
+        Department dep = departmentService.find(1L);
+
+        long epochMilli = ZonedDateTime.of(dep.getDateTimeUpdated(), ZoneId.systemDefault()).toInstant().toEpochMilli();
+
+        //
 //
-//        ).forEach(departmentService::save);
+//        System.out.println(epochMilli);
+//
+//        DepartmentUpdateDTO updateDTO = new DepartmentUpdateDTO("DownDirectory", "000", 1L, null);
+//
+//        departmentService.update(1L, 1687025266960L, updateDTO);
+
 
 //
 //        Department dep = departmentService.find(1L);
@@ -70,11 +90,11 @@ public class Main {
 //
 //        );
 //        System.out.println(department);
-
-        List<Department> res = departmentDao.findAll(
-                List.of( "fakedepchild","","newFinance ")
-        );
-        System.out.println(res);
+//
+//        List<Department> res = departmentDao.findAll(
+//                List.of( "fakedepchild","","newFinance ")
+//        );
+//        System.out.println(res);
 
 //        boolean hasChildren = departmentDao.hasChildren(18L);
 //        System.out.println(hasChildren);

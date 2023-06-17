@@ -8,8 +8,11 @@ import org.example.service.api.IDepartmentService;
 import org.example.service.factory.DepartmentServiceFactory;
 import org.example.service.factory.LocationServiceFactory;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DepartmentServiceImpl implements IDepartmentService {
 
@@ -55,20 +58,29 @@ public class DepartmentServiceImpl implements IDepartmentService {
     }
 
     @Override
-    public Department update(DepartmentUpdateDTO departmentUpdateDTO) {
-        Long id = departmentUpdateDTO.getId();
-        Department parent;
-        Department toUpdate = departmentDao.find(id);
-        Location location;
+    public Department update(Long id, Long version, DepartmentUpdateDTO departmentUpdateDTO) {
 
-        String newName = departmentUpdateDTO.getName();
-        String newPhone = departmentUpdateDTO.getPhoneNum();
+        Department departmentToUpdate = departmentDao.find(id);
 
-        if (toUpdate == null) {
+        if (departmentToUpdate == null) {
 
             throw new IllegalArgumentException("Указан неверный id");
 
         }
+        //TODO РАСПИСАТЬ ВАРИАНТЫ
+//        if (!Objects.equals(
+//                version,
+//                ZonedDateTime.of(departmentToUpdate.getDateTimeUpdated(), ZoneId.systemDefault()).toInstant().toEpochMilli()
+//        )) {
+//
+//            throw new IllegalArgumentException("Версия объекта не совпадает");
+//
+//        }
+        Department parent;
+        Location location;
+
+        String newName = departmentUpdateDTO.getName();
+        String newPhone = departmentUpdateDTO.getPhoneNum();
 
         Long parentId = departmentUpdateDTO.getParent_id();
 
@@ -89,8 +101,10 @@ public class DepartmentServiceImpl implements IDepartmentService {
                 throw new IllegalArgumentException("Ну зачем??");
             }
 
-            toUpdate.setParent(parent);
+            departmentToUpdate.setParent(parent);
 
+        } else {
+            departmentToUpdate.setParent(null);
         }
 
         Long locationId = departmentUpdateDTO.getLocationId();
@@ -102,19 +116,20 @@ public class DepartmentServiceImpl implements IDepartmentService {
                 throw new IllegalArgumentException("Такой локации не существует");
             }
 
-            toUpdate.setLocation(location);
+            departmentToUpdate.setLocation(location);
 
+        } else {
+            departmentToUpdate.setLocation(null);
         }
 
+        //TODO Переделать на обработку ошибки
         if (newName != null) {
-            toUpdate.setName(newName);
+            departmentToUpdate.setName(newName);
         }
 
-        if (newPhone != null) {
-            toUpdate.setPhone(newPhone);
-        }
+        departmentToUpdate.setPhone(newPhone);
 
-        return departmentDao.update(toUpdate);
+        return departmentDao.update(version, departmentToUpdate);
 
 
     }

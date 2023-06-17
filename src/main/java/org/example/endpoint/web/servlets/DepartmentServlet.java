@@ -26,6 +26,7 @@ public class DepartmentServlet extends HttpServlet {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    //TODO установить статус 201
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
@@ -52,6 +53,8 @@ public class DepartmentServlet extends HttpServlet {
 
 
     }
+    //TODO установить статус 200
+    // возвращать версию в jsone
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -102,6 +105,9 @@ public class DepartmentServlet extends HttpServlet {
         writer.write(resultToSend);
     }
 
+    //TODO установить статус 200
+    // принимать id как системный параметр
+    // принимать version как системный параметр
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -142,10 +148,38 @@ public class DepartmentServlet extends HttpServlet {
 
     }
 
+    //TODO установить статус 200
+    // принимать id как системный параметр
+    // принимать version как системный параметр
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
         PrintWriter writer = resp.getWriter();
+
+        String idString = req.getParameter("id");
+        String versionString = req.getParameter("version");
+
+        if (null == idString) {
+            resp.sendError(400, "Нужен id");
+            return;
+        }
+
+        if (null == versionString) {
+            resp.sendError(400, "Нужен version");
+            return;
+        }
+
+        Long id, version;
+
+        try {
+            id = Long.valueOf(idString);
+            version = Long.valueOf(versionString);
+        } catch (NumberFormatException e) {
+            resp.sendError(400, "в id или в version передано необрабатываемое значение");
+            return;
+        }
+
+
 
         DepartmentUpdateDTO departmentUpdateDTO = objectMapper.readValue(req.getInputStream(), DepartmentUpdateDTO.class);
 
@@ -153,7 +187,7 @@ public class DepartmentServlet extends HttpServlet {
 
 
         try {
-            Department department = service.update(departmentUpdateDTO);
+            Department department = service.update(id, version, departmentUpdateDTO);
             departmentDTO = EntityToDtoConverter.convertToDepartmentDTO(department);
 
         } catch (IllegalArgumentException e) {

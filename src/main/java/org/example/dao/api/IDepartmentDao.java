@@ -20,8 +20,7 @@ public interface IDepartmentDao {
 
     List<Department> findChildren(Long parentId);
 
-    Department update(Department copy);
-
+    Department update(Long version, Department copy);
 
 
 

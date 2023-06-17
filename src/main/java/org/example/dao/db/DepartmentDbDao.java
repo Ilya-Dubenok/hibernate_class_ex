@@ -11,6 +11,9 @@ import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
+//TODO сделать обработку ошибок по констрэйнтам
+// сделать удаление департамента напрямую с обрабокой эксепшена
 public class DepartmentDbDao implements IDepartmentDao {
 
 
@@ -182,7 +185,7 @@ public class DepartmentDbDao implements IDepartmentDao {
     }
 
     @Override
-    public Department update(Department toUpdate) {
+    public Department update(Long version, Department toUpdate) {
         EntityManager em = HibernateUtil.getEntityManager();
         em.getTransaction().begin();
 

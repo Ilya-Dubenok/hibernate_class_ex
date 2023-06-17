@@ -22,6 +22,8 @@ public class LocationsServlet extends HttpServlet {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+
+    //TODO установить статус 201
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
@@ -50,7 +52,7 @@ public class LocationsServlet extends HttpServlet {
 
     }
 
-
+    //TODO установить статус 200
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
@@ -83,6 +85,9 @@ public class LocationsServlet extends HttpServlet {
 
     }
 
+    //TODO установить статус 200
+    // принимать id как системный параметр
+    // принимать version как системный параметр
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");

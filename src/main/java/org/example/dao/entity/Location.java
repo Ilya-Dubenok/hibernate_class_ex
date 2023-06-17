@@ -1,21 +1,38 @@
 package org.example.dao.entity;
 
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Objects;
 
 @Entity
+@Table(
+       uniqueConstraints = @UniqueConstraint(name = "location_unique_name",columnNames = {"name"})
+)
 public class Location implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    @CreationTimestamp
+    @Column(name = "create_stamp")
+    private Instant dateTimeCreated;
+
+
+    @UpdateTimestamp
+    @Column(name = "update_stamp")
+    private Instant dateTimeUpdated;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
+
 
 
     public Location() {

@@ -2,21 +2,40 @@ package org.example.dao.entity;
 
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
+@Table(
+        uniqueConstraints = @UniqueConstraint(name = "department_unique_name_constraint",columnNames = {"name"})
+)
 public class Department {
 
 
     private static final long serialVersionUID = 1L;
 
+
+    @CreationTimestamp
+    @Column(name = "create_stamp")
+    private LocalDateTime dateTimeCreated;
+
+
+    @Version
+    @UpdateTimestamp
+    @Column(name = "update_stamp")
+    private LocalDateTime dateTimeUpdated;
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @JoinTable(
@@ -31,7 +50,7 @@ public class Department {
     private String phone;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(foreignKey = @ForeignKey(name = "location_department_fk"))
     private Location location;
 
     @Column(name = "active", nullable = false)
@@ -48,7 +67,6 @@ public class Department {
         this.phone = phone;
         this.location = location;
     }
-
 
 
     public Long getId() {
@@ -97,6 +115,22 @@ public class Department {
 
     public void setActive(Boolean active) {
         isActive = active;
+    }
+
+    public LocalDateTime getDateTimeCreated() {
+        return dateTimeCreated;
+    }
+
+    public void setDateTimeCreated(LocalDateTime dateTimeCreated) {
+        this.dateTimeCreated = dateTimeCreated;
+    }
+
+    public LocalDateTime getDateTimeUpdated() {
+        return dateTimeUpdated;
+    }
+
+    public void setDateTimeUpdated(LocalDateTime dateTimeUpdated) {
+        this.dateTimeUpdated = dateTimeUpdated;
     }
 
     @Override

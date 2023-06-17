@@ -15,10 +15,11 @@ public interface IDepartmentService {
 
     Department save(DepartmentCreateDTO departmentCreateDTO);
 
-    Department update(DepartmentUpdateDTO departmentUpdateDTO);
+    Department update(Long id, Long version, DepartmentUpdateDTO departmentUpdateDTO);
 
     List<Department> findChildren(Long parentId);
 
+    //TODO add version
     boolean setInactive(Long id);
 
 

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DepartmentUpdateDTO {
 
-    private Long id;
 
     private String name;
 
@@ -19,21 +18,13 @@ public class DepartmentUpdateDTO {
     public DepartmentUpdateDTO() {
     }
 
-    public DepartmentUpdateDTO(Long id, String name, String phoneNum, Long locationId, Long parent_id) {
-        this.id = id;
+    public DepartmentUpdateDTO(String name, String phoneNum, Long locationId, Long parent_id) {
         this.name = name;
         this.phoneNum = phoneNum;
         this.locationId = locationId;
         this.parent_id = parent_id;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
