@@ -6,13 +6,15 @@ public class DepartmentDTO {
 
     private  Long id;
 
+    private Long version;
+
     private  String name;
 
     private  String phoneNum;
 
     private  Long locationId;
 
-    private Long parent;
+    private Long parentId;
 
     private List<Long> children;
 
@@ -20,21 +22,30 @@ public class DepartmentDTO {
     public DepartmentDTO() {
     }
 
-    public DepartmentDTO(Long id, String name, String phoneNum, Long locationId, List<Long> children, Long parent) {
+    public DepartmentDTO(Long id, Long version, String name, String phoneNum, Long locationId, List<Long> children, Long parentId) {
         this.id = id;
+        this.version = version;
         this.name = name;
         this.phoneNum = phoneNum;
         this.locationId = locationId;
         this.children = children;
-        this.parent = parent;
+        this.parentId = parentId;
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     public String getName() {
@@ -57,7 +68,7 @@ public class DepartmentDTO {
         return locationId;
     }
 
-    public void setLocationId(long locationId) {
+    public void setLocationId(Long locationId) {
         this.locationId = locationId;
     }
 
@@ -69,11 +80,11 @@ public class DepartmentDTO {
         this.children = children;
     }
 
-    public Long getParent() {
-        return parent;
+    public Long getParentId() {
+        return parentId;
     }
 
-    public void setParent(Long parent) {
-        this.parent = parent;
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
     }
 }

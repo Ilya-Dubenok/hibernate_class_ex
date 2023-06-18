@@ -13,9 +13,13 @@ import org.example.service.api.ILocationService;
 import org.example.service.factory.DepartmentServiceFactory;
 import org.example.service.factory.LocationServiceFactory;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Stream;
 
 public class Main {
@@ -26,45 +30,69 @@ public class Main {
         IDepartmentService departmentService = DepartmentServiceFactory.getInstance();
 
         ILocationService instance = LocationServiceFactory.getInstance();
-        instance.save(
-                new LocationCreateDTO("Minsk")
-        );
-        instance.save(
-                new LocationCreateDTO("Gomel")
-        );
-        instance.save(
-                new LocationCreateDTO("Gdansk")
-        );
-
-
-
-        Stream.of(
-                new DepartmentCreateDTO(
-                        "Directory", "000", 1L, null
-                ),
-                new DepartmentCreateDTO(
-                        "Finance", "001", 2L, 1L
-                ),
-                new DepartmentCreateDTO(
-                        "Accounting", "003", 3L, 1L
-                ),
-                new DepartmentCreateDTO(
-                        "FakeDep", "004", 1L, null
-                ),
-                new DepartmentCreateDTO(
-                        "FakeDepChild", "005", 2L, 4L
-                )
-
-        ).forEach(departmentService::save);
-
-
-        Department dep = departmentService.find(1L);
-
-        long epochMilli = ZonedDateTime.of(dep.getDateTimeUpdated(), ZoneId.systemDefault()).toInstant().toEpochMilli();
-
-        //
+//        instance.save(
+//                new LocationCreateDTO("Minsk")
+//        );
+//        instance.save(
+//                new LocationCreateDTO("Gomel")
+//        );
+//        instance.save(
+//                new LocationCreateDTO("Gdansk")
+//        );
 //
+//
+//
+//        Stream.of(
+//                new DepartmentCreateDTO(
+//                        "Directory", "000", 1L, null
+//                ),
+//                new DepartmentCreateDTO(
+//                        "Finance", "001", 2L, 1L
+//                ),
+//                new DepartmentCreateDTO(
+//                        "Accounting", "003", 3L, 1L
+//                ),
+//                new DepartmentCreateDTO(
+//                        "FakeDep", "004", 1L, null
+//                ),
+//                new DepartmentCreateDTO(
+//                        "FakeDepChild", "005", 2L, 4L
+//                )
+//
+//        ).forEach(departmentService::save);
+
+//
+//        Department dep = departmentService.find(5l);
+//
+//        long epochMilli = ZonedDateTime.of(dep.getDateTimeUpdated(), ZoneId.systemDefault()).toInstant().toEpochMilli();
+//
+//
+//        System.out.println(
+//                departmentService.setInactive(5L, epochMilli)
+//
+//        );
+
+
+//
+//
+//        Department dep = departmentService.find(1L);
+//
+//        long epochMilli = ZonedDateTime.of(dep.getDateTimeUpdated(), ZoneId.systemDefault()).toInstant().toEpochMilli();
+
+//1687027670816
 //        System.out.println(epochMilli);
+
+//        departmentService.update(1L, 1L, null);
+//
+//        departmentService.update(1L,1687027670816L,
+//                new DepartmentUpdateDTO(
+//                        "DownDirectory", "000", 1L, null
+//                ));
+//
+//        departmentService.update(1L,1687027670816L,
+//                new DepartmentUpdateDTO(
+//                        "UpDirectory", "000", 1L, null
+//                ));
 //
 //        DepartmentUpdateDTO updateDTO = new DepartmentUpdateDTO("DownDirectory", "000", 1L, null);
 //
@@ -96,12 +124,21 @@ public class Main {
 //        );
 //        System.out.println(res);
 
+        Department dep = departmentService.find(4L);
+
+
+        long epochMilli = ZonedDateTime.of(dep.getDateTimeUpdated(), ZoneId.systemDefault()).toInstant().toEpochMilli();
+
+        departmentService.update(4L,epochMilli, new DepartmentUpdateDTO("Finance","ff",3L,null));
+
 //        boolean hasChildren = departmentDao.hasChildren(18L);
 //        System.out.println(hasChildren);
-
+//
 //        DepartmentCreateDTO createDTO = new DepartmentCreateDTO(
-//                "CHILD2", "333", 2L, 3L
+//                null, "333", 2L, 3L
 //        );
+//        departmentService.save(createDTO);
+
 //
 //        Department save = DepartmentServiceFactory.getInstance().save(createDTO);
 //

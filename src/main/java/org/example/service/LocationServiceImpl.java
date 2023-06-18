@@ -4,7 +4,11 @@ import org.example.core.dto.LocationCreateDTO;
 import org.example.core.dto.LocationDTO;
 import org.example.dao.api.ILocationDao;
 import org.example.dao.entity.Location;
+import org.example.dao.utils.DataBaseExceptionMapper;
 import org.example.service.api.ILocationService;
+
+import javax.persistence.PersistenceException;
+
 
 public class LocationServiceImpl implements ILocationService {
 
@@ -25,9 +29,19 @@ public class LocationServiceImpl implements ILocationService {
     public Location save(LocationCreateDTO locationCreateDTO) {
 
         Location location = convertToLocation(locationCreateDTO);
-        return locationDao.save(location);
+        try {
 
+            return locationDao.save(location);
+        } catch (PersistenceException e) {
+
+            DataBaseExceptionMapper.throwHandledExceptionIfApplied(e);
+
+            throw e;
+
+        }
     }
+
+
 
     @Override
     public Location update(LocationDTO dto) {

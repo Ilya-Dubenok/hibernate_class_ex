@@ -13,14 +13,14 @@ public interface IDepartmentDao {
     Department findNotActive(Long id);
 
 
-    boolean setInactive(Long id);
+    boolean setInactive(Long id, Long version);
 
     List<Department> findAll(List<String> filters);
 
 
     List<Department> findChildren(Long parentId);
 
-    Department update(Long version, Department copy);
+    Department update(Department copy);
 
 
 

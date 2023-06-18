@@ -23,7 +23,6 @@ public class LocationsServlet extends HttpServlet {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
 
-    //TODO установить статус 201
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
@@ -47,12 +46,13 @@ public class LocationsServlet extends HttpServlet {
                 )
         );
 
+        resp.setStatus(HttpServletResponse.SC_CREATED);
+
         writer.write(resultToSend);
 
 
     }
 
-    //TODO установить статус 200
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
@@ -80,6 +80,7 @@ public class LocationsServlet extends HttpServlet {
 
         String result = objectMapper.writeValueAsString(res);
 
+        resp.setStatus(HttpServletResponse.SC_OK);
         writer.write(result);
 
 

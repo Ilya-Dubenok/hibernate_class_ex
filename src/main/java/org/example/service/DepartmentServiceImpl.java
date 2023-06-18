@@ -4,10 +4,13 @@ import org.example.core.dto.*;
 import org.example.dao.api.IDepartmentDao;
 import org.example.dao.entity.Department;
 import org.example.dao.entity.Location;
+import org.example.dao.utils.DataBaseExceptionMapper;
 import org.example.service.api.IDepartmentService;
 import org.example.service.factory.DepartmentServiceFactory;
 import org.example.service.factory.LocationServiceFactory;
 
+import javax.persistence.OptimisticLockException;
+import javax.persistence.PersistenceException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -30,31 +33,31 @@ public class DepartmentServiceImpl implements IDepartmentService {
 
 
     @Override
-    public List<Department> findAll(DepartmentFindDTO departmentFindDTO) {
-        List<Department> res = new ArrayList<>();
-        Long mainId = departmentFindDTO.getId();
+    public List<Department> findAll(List<String> filters) {
 
-        if (departmentFindDTO.getId() != null) {
-            res.add(departmentDao.find(mainId));
-            return res;
-
-        }
-
-        res.addAll(departmentDao.findAll(departmentFindDTO.getFilters()));
-        return res;
+        return new ArrayList<>(departmentDao.findAll(filters));
 
     }
 
     @Override
     public Department save(DepartmentCreateDTO departmentCreateDTO) {
-        Long parentId = departmentCreateDTO.getParent_id();
+        Long parentId = departmentCreateDTO.getParentId();
         if (parentId != null && departmentDao.findNotActive(parentId) != null) {
 
             throw new IllegalArgumentException("Указан deprecated id");
         }
 
         Department department = convertToDepartment(departmentCreateDTO);
-        return departmentDao.save(department);
+        try {
+            return departmentDao.save(department);
+
+        } catch (PersistenceException e) {
+
+            DataBaseExceptionMapper.throwHandledExceptionIfApplied(e);
+
+            throw e;
+
+        }
     }
 
     @Override
@@ -67,15 +70,14 @@ public class DepartmentServiceImpl implements IDepartmentService {
             throw new IllegalArgumentException("Указан неверный id");
 
         }
-        //TODO РАСПИСАТЬ ВАРИАНТЫ
-//        if (!Objects.equals(
-//                version,
-//                ZonedDateTime.of(departmentToUpdate.getDateTimeUpdated(), ZoneId.systemDefault()).toInstant().toEpochMilli()
-//        )) {
-//
-//            throw new IllegalArgumentException("Версия объекта не совпадает");
-//
-//        }
+        if (!Objects.equals(
+                version,
+                ZonedDateTime.of(departmentToUpdate.getDateTimeUpdated(), ZoneId.systemDefault()).toInstant().toEpochMilli()
+        )) {
+
+            throw new IllegalArgumentException("Версия объекта уже была обновлена");
+
+        }
         Department parent;
         Location location;
 
@@ -122,14 +124,23 @@ public class DepartmentServiceImpl implements IDepartmentService {
             departmentToUpdate.setLocation(null);
         }
 
-        //TODO Переделать на обработку ошибки
-        if (newName != null) {
-            departmentToUpdate.setName(newName);
-        }
+        departmentToUpdate.setName(newName);
+
 
         departmentToUpdate.setPhone(newPhone);
 
-        return departmentDao.update(version, departmentToUpdate);
+        try {
+
+            return departmentDao.update(departmentToUpdate);
+        } catch (OptimisticLockException e) {
+            throw new IllegalArgumentException("Версия объекта уже неактуальна");
+        } catch (PersistenceException e) {
+
+            DataBaseExceptionMapper.throwHandledExceptionIfApplied(e);
+
+            throw e;
+
+        }
 
 
     }
@@ -140,13 +151,17 @@ public class DepartmentServiceImpl implements IDepartmentService {
     }
 
     @Override
-    public boolean setInactive(Long id) {
-        boolean hasChildren = departmentDao.hasChildren(id);
-        if (hasChildren) {
-            throw new IllegalArgumentException("У него же есть дети!");
-        }
+    public boolean setInactive(Long id, Long version) {
+        try {
+            return departmentDao.setInactive(id, version);
 
-        return departmentDao.setInactive(id);
+        } catch (PersistenceException e) {
+
+            DataBaseExceptionMapper.throwHandledExceptionIfApplied(e);
+
+            throw e;
+
+        }
 
     }
 
@@ -165,7 +180,7 @@ public class DepartmentServiceImpl implements IDepartmentService {
         }
 
 
-        if ((id = departmentCreateDTO.getParent_id()) != null) {
+        if ((id = departmentCreateDTO.getParentId()) != null) {
             parent = DepartmentServiceFactory.getInstance().find(id);
             if (parent == null) {
                 throw new IllegalArgumentException("Родителя с id " + id + " не найдено");

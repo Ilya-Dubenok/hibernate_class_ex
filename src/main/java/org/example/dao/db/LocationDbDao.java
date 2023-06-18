@@ -44,19 +44,12 @@ public class LocationDbDao implements ILocationDao {
             em.persist(location);
             em.getTransaction().commit();
             em.close();
-        } catch (
-                PersistenceException e
-        ) {
-            if (e.getCause().getClass().equals(ConstraintViolationException.class)) {
-                throw new IllegalArgumentException("Задано не уникальное имя для локации!\n" + e.getMessage());
-            } else {
-                throw e;
-            }
+            return location;
+
         } finally {
             em.close();
         }
 
-        return location;
     }
 
     @Override

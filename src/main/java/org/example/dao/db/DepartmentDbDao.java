@@ -7,13 +7,17 @@ import org.hibernate.exception.ConstraintViolationException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
+import javax.persistence.TemporalType;
 import javax.persistence.criteria.*;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 
-//TODO сделать обработку ошибок по констрэйнтам
-// сделать удаление департамента напрямую с обрабокой эксепшена
 public class DepartmentDbDao implements IDepartmentDao {
 
 
@@ -30,18 +34,10 @@ public class DepartmentDbDao implements IDepartmentDao {
             em.getTransaction().begin();
             em.persist(department);
             em.getTransaction().commit();
-        } catch (
-                PersistenceException e
-        ) {
-            if (e.getCause().getClass().equals(ConstraintViolationException.class)) {
-                throw new IllegalArgumentException("Задано не уникальное имя для департамента!\n" + e.getMessage());
-            } else {
-                throw e;
-            }
+            return department;
         } finally {
             em.close();
         }
-        return department;
 
     }
 
@@ -49,17 +45,25 @@ public class DepartmentDbDao implements IDepartmentDao {
     @Override
     public Department find(Long id) {
         EntityManager em = HibernateUtil.getEntityManager();
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Department> criteria = cb.createQuery(Department.class);
-        Root<Department> root = criteria.from(Department.class);
-        criteria.select(root).where(cb.and(cb.equal(root.get("id"), id), cb.equal(root.get("isActive"), true)));
+        try {
 
-        List<Department> resultList = em.createQuery(criteria).getResultList();
-        em.close();
-        if (resultList.size() > 0) {
-            return resultList.get(0);
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Department> criteria = cb.createQuery(Department.class);
+            Root<Department> root = criteria.from(Department.class);
+            criteria.select(root).where(cb.and(cb.equal(root.get("id"), id), cb.equal(root.get("isActive"), true)));
+
+            List<Department> resultList = em.createQuery(criteria).getResultList();
+
+            if (resultList.size() > 0) {
+                return resultList.get(0);
+            }
+
+            return null;
+
+        } finally {
+
+            em.close();
         }
-        return null;
 
 
     }
@@ -67,95 +71,134 @@ public class DepartmentDbDao implements IDepartmentDao {
     @Override
     public Department findNotActive(Long id) {
         EntityManager em = HibernateUtil.getEntityManager();
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Department> criteria = cb.createQuery(Department.class);
-        Root<Department> root = criteria.from(Department.class);
-        criteria.select(root).where(cb.and(cb.equal(root.get("id"), id), cb.equal(root.get("isActive"), false)));
 
-        List<Department> resultList = em.createQuery(criteria).getResultList();
-        em.close();
-        if (resultList.size() > 0) {
-            return resultList.get(0);
+        try {
+
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Department> criteria = cb.createQuery(Department.class);
+            Root<Department> root = criteria.from(Department.class);
+            criteria.select(root).where(cb.and(cb.equal(root.get("id"), id), cb.equal(root.get("isActive"), false)));
+
+            List<Department> resultList = em.createQuery(criteria).getResultList();
+
+            if (resultList.size() > 0) {
+                return resultList.get(0);
+            }
+
+            return null;
+
+
+        } finally {
+            em.close();
+
         }
-        return null;
 
 
     }
 
     @Override
-    public boolean setInactive(Long id) {
+    public boolean setInactive(Long id, Long version) {
         EntityManager em = HibernateUtil.getEntityManager();
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaUpdate<Department> criteriaUpdate = cb.createCriteriaUpdate(Department.class);
-        Root<Department> root = criteriaUpdate.from(Department.class);
 
-        Expression<String> expression = root.get("name");
-        criteriaUpdate.set("name", cb.concat("(DELETED)", expression));
+        try {
 
-        criteriaUpdate.set("isActive", false);
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaUpdate<Department> criteriaUpdate = cb.createCriteriaUpdate(Department.class);
+            Root<Department> root = criteriaUpdate.from(Department.class);
 
-        criteriaUpdate.where(
-                cb.equal(root.get("id"), id),
-                cb.equal(root.get("isActive"), true)
-        );
-        em.getTransaction().begin();
+            Expression<String> expression = root.get("name");
+            criteriaUpdate.set("name", cb.concat("(DELETED)", expression));
 
-        int i = em.createQuery(criteriaUpdate).executeUpdate();
-        em.getTransaction().commit();
-        em.close();
+            Timestamp timestamp = new Timestamp(version);
+            criteriaUpdate.set("isActive", false);
+            criteriaUpdate.set("dateTimeUpdated", LocalDateTime.now());
 
-        return i > 0;
+            Expression<Timestamp> function = cb.function("date_trunc",
+                    Timestamp.class,
+                    cb.literal("milliseconds"),
+                    root.get("dateTimeUpdated"));
+
+
+            criteriaUpdate.where(
+                    cb.equal(root.get("id"), id),
+                    cb.equal(root.get("isActive"), true),
+                    cb.equal(function, timestamp)
+            );
+
+
+            em.getTransaction().begin();
+
+            int i = em.createQuery(criteriaUpdate).executeUpdate();
+            em.getTransaction().commit();
+            return i > 0;
+
+        } finally {
+            em.close();
+
+        }
+
+
     }
 
     @Override
     public List<Department> findAll(List<String> filters) {
+
         EntityManager em = HibernateUtil.getEntityManager();
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Department> criteria = cb.createQuery(Department.class);
-        Root<Department> root = criteria.from(Department.class);
-        List<Predicate> globalRestrictions = new ArrayList<>();
-        globalRestrictions.add(
-                cb.equal(root.get("isActive"), true)
-        );
 
-        if (filters != null && filters.size() > 0) {
-            Predicate likeRestriction = null;
+        try {
 
-            boolean needAnother = false;
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Department> criteria = cb.createQuery(Department.class);
+            Root<Department> root = criteria.from(Department.class);
+            List<Predicate> globalPredicates = new ArrayList<>();
+            globalPredicates.add(
+                    cb.equal(root.get("isActive"), true)
+            );
 
-            for (String filter : filters) {
+            if (filters != null && filters.size() > 0) {
+                Predicate likeRestriction = null;
 
-                Predicate likeToFilterStripAndToLower = cb.like(
-                        cb.lower(cb.function(
-                                "REPLACE", String.class, root.get("name"),
-                                cb.literal(" "),
-                                cb.literal(""))),
+                boolean needAnother = false;
 
-                        filter.toLowerCase().replaceAll(" ","")
-                );
+                for (String filter : filters) {
 
-                if (needAnother) {
+                    Predicate likeToFilterStripAndToLower = cb.like(
+                            cb.lower(cb.function(
+                                    "REPLACE", String.class, root.get("name"),
+                                    cb.literal(" "),
+                                    cb.literal(""))),
 
-                    likeRestriction = cb.or(
-                            likeRestriction,
-                            likeToFilterStripAndToLower
+                            filter.toLowerCase().replaceAll(" ", "")
                     );
 
-                } else {
-                    likeRestriction = likeToFilterStripAndToLower;
-                    needAnother = true;
+                    if (needAnother) {
+
+                        likeRestriction = cb.or(
+                                likeRestriction,
+                                likeToFilterStripAndToLower
+                        );
+
+                    } else {
+                        likeRestriction = likeToFilterStripAndToLower;
+                        needAnother = true;
+                    }
                 }
+
+                globalPredicates.add(likeRestriction);
+
             }
 
-            globalRestrictions.add(likeRestriction);
+            criteria.where(globalPredicates.toArray(new Predicate[0]));
+
+            List<Department> resultList = em.createQuery(criteria).getResultList();
+
+            return resultList;
+
+        } finally {
+
+            em.close();
 
         }
-
-        criteria.where(globalRestrictions.toArray(new Predicate[0]));
-
-        List<Department> resultList = em.createQuery(criteria).getResultList();
-        em.close();
-        return resultList;
 
     }
 
@@ -163,90 +206,77 @@ public class DepartmentDbDao implements IDepartmentDao {
     @Override
     public List<Department> findChildren(Long parentId) {
         EntityManager em = HibernateUtil.getEntityManager();
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Department> query = cb.createQuery(Department.class);
-        Root<Department> root = query.from(Department.class);
-        //<Parent,Child>
-        Join<Department, Department> children = root.join("parent");
-        children.on(
-                cb.and(
-                        cb.equal(children.get("id"), parentId),
-                        cb.equal(children.get("isActive"), true),
-                        cb.equal(root.get("isActive"), true)
 
-                )
-        );
-        query.select(root);
+        try {
 
-        List<Department> res = em.createQuery(query).getResultList();
-        em.close();
-        return res;
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Department> query = cb.createQuery(Department.class);
+            Root<Department> root = query.from(Department.class);
+            //<Parent,Child>
+            Join<Department, Department> children = root.join("parent");
+            children.on(
+                    cb.and(
+                            cb.equal(children.get("id"), parentId),
+                            cb.equal(children.get("isActive"), true),
+                            cb.equal(root.get("isActive"), true)
+
+                    )
+            );
+            query.select(root);
+
+            List<Department> res = em.createQuery(query).getResultList();
+            return res;
+
+        } finally {
+
+            em.close();
+        }
 
     }
 
     @Override
-    public Department update(Long version, Department toUpdate) {
+    public Department update(Department toUpdate) {
         EntityManager em = HibernateUtil.getEntityManager();
-        em.getTransaction().begin();
 
         try {
+
+            em.getTransaction().begin();
             Department res = em.merge(toUpdate);
             em.getTransaction().commit();
             return res;
-        } catch (
-                PersistenceException e
-        ) {
-            if (e.getCause().getClass().equals(ConstraintViolationException.class)) {
-                throw new IllegalArgumentException("Задано не уникальное новое имя для департамента!\n" + e.getMessage());
-            } else {
-                throw e;
-            }
+
         } finally {
             em.close();
         }
-
-//        EntityManager em = HibernateUtil.getEntityManager();
-//        em.getTransaction().begin();
-//
-//        CriteriaBuilder cb = em.getCriteriaBuilder();
-//        CriteriaUpdate<Department> criteriaUpdate = cb.createCriteriaUpdate(Department.class);
-//        Root<Department> root = criteriaUpdate.from(Department.class);
-//        criteriaUpdate
-//                .set("name", toUpdate.getName())
-//                .set("parent", toUpdate.getParent())
-//                .set("location", toUpdate.getLocation())
-//                .set("phone", toUpdate.getPhone())
-//                .where(
-//                        cb.equal(root.get("id"),toUpdate.getId())
-//                );
-//
-//        em.createQuery(criteriaUpdate).executeUpdate();
-//        em.getTransaction().commit();
-//        em.close();
-//
-//        return toUpdate;
-
 
     }
 
     @Override
     public boolean hasChildren(Long parentId) {
         EntityManager em = HibernateUtil.getEntityManager();
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Long> query = cb.createQuery(Long.class);
-        Root<Department> root = query.from(Department.class);
-        Join<Department, Department> children = root.join("parent");
-        children.on(
-                cb.and(
-                        cb.equal(children.get("id"), parentId),
-                        cb.equal(children.get("isActive"), true),
-                        cb.equal(root.get("isActive"), true)
 
-                )
-        );
-        query.select(cb.count(children));
+        try {
 
-        return em.createQuery(query).getSingleResult() > 0L;
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Long> query = cb.createQuery(Long.class);
+            Root<Department> root = query.from(Department.class);
+            Join<Department, Department> children = root.join("parent");
+            children.on(
+                    cb.and(
+                            cb.equal(children.get("id"), parentId),
+                            cb.equal(children.get("isActive"), true),
+                            cb.equal(root.get("isActive"), true)
+
+                    )
+            );
+            query.select(cb.count(children));
+
+            return em.createQuery(query).getSingleResult() > 0L;
+
+        } finally {
+
+            em.close();
+        }
 
 
     }

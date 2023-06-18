@@ -21,7 +21,7 @@ public class Department {
 
 
     @CreationTimestamp
-    @Column(name = "create_stamp")
+    @Column(name = "create_stamp",columnDefinition = "")
     private LocalDateTime dateTimeCreated;
 
 

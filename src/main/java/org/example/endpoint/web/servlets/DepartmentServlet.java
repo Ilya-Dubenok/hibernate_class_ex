@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.core.dto.DepartmentCreateDTO;
 import org.example.core.dto.DepartmentDTO;
-import org.example.core.dto.DepartmentFindDTO;
 import org.example.core.dto.DepartmentUpdateDTO;
 import org.example.dao.entity.Department;
 import org.example.service.api.IDepartmentService;
@@ -26,7 +25,6 @@ public class DepartmentServlet extends HttpServlet {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    //TODO установить статус 201
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
@@ -49,12 +47,12 @@ public class DepartmentServlet extends HttpServlet {
 
         String resultToSend = objectMapper.writeValueAsString(departmentCreateDTO);
 
+        resp.setStatus(HttpServletResponse.SC_CREATED);
+
         writer.write(resultToSend);
 
 
     }
-    //TODO установить статус 200
-    // возвращать версию в jsone
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -68,6 +66,8 @@ public class DepartmentServlet extends HttpServlet {
                 Department department = service.find(Long.valueOf(id));
                 DepartmentDTO res = EntityToDtoConverter.convertToDepartmentDTO(department);
                 String resultToSend = objectMapper.writeValueAsString(res);
+
+                resp.setStatus(HttpServletResponse.SC_OK);
 
                 writer.write(resultToSend);
 
@@ -86,17 +86,9 @@ public class DepartmentServlet extends HttpServlet {
         }
 
         String[] filters = req.getParameterValues("filters");
-        DepartmentFindDTO departmentFindDTO = new DepartmentFindDTO();
-        if (filters != null) {
-            departmentFindDTO.setFilters(
-                    List.of(filters)
-            );
-        } else {
-            departmentFindDTO.setFilters(null);
 
-        }
 
-        List<Department> all = service.findAll(departmentFindDTO);
+        List<Department> all = service.findAll(null == filters ? null : List.of(filters));
 
         List<DepartmentDTO> res = EntityToDtoConverter.convertToDepartmentDTOList(all);
 
@@ -105,32 +97,40 @@ public class DepartmentServlet extends HttpServlet {
         writer.write(resultToSend);
     }
 
-    //TODO установить статус 200
-    // принимать id как системный параметр
-    // принимать version как системный параметр
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
-        String id = req.getParameter("id");
-        if (null == id) {
+        String idString = req.getParameter("id");
+        if (null == idString) {
 
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Не передано id");
             return;
 
         }
 
-        long identer;
+        String versionString = req.getParameter("version");
+
+        if (null == versionString) {
+
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Не передана версия");
+            return;
+
+        }
+
+        long id;
+        long version;
         boolean deleted;
 
         try {
 
-            identer = Long.parseLong(id);
-            deleted = service.setInactive(identer);
+            id = Long.parseLong(idString);
+            version = Long.parseLong(versionString);
+            deleted = service.setInactive(id, version);
 
         } catch (NumberFormatException e) {
 
-            resp.sendError(400, "Хреновое id");
+            resp.sendError(400, "Хреновое id или версия");
             return;
         } catch (IllegalArgumentException e) {
             resp.sendError(400, e.getMessage());
@@ -148,9 +148,6 @@ public class DepartmentServlet extends HttpServlet {
 
     }
 
-    //TODO установить статус 200
-    // принимать id как системный параметр
-    // принимать version как системный параметр
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
@@ -180,7 +177,6 @@ public class DepartmentServlet extends HttpServlet {
         }
 
 
-
         DepartmentUpdateDTO departmentUpdateDTO = objectMapper.readValue(req.getInputStream(), DepartmentUpdateDTO.class);
 
         DepartmentDTO departmentDTO;
@@ -197,6 +193,8 @@ public class DepartmentServlet extends HttpServlet {
         }
 
         String resultToSend = objectMapper.writeValueAsString(departmentDTO);
+
+        resp.setStatus(HttpServletResponse.SC_OK);
 
         writer.write(resultToSend);
 

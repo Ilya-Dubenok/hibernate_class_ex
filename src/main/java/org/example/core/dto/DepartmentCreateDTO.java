@@ -3,11 +3,13 @@ package org.example.core.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@JsonIgnoreProperties(ignoreUnknown = true, value = {"id"}, allowGetters = true)
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"id","version"}, allowGetters = true)
 public class DepartmentCreateDTO {
 
 
     private Long id;
+
+    private Long version;
 
     private String name;
 
@@ -15,17 +17,17 @@ public class DepartmentCreateDTO {
 
     private Long locationId;
 
-    private Long parent_id;
+    private Long parentId;
 
 
     public DepartmentCreateDTO() {
     }
 
-    public DepartmentCreateDTO(String name, String phoneNum, Long locationId, Long parent_id) {
+    public DepartmentCreateDTO(String name, String phoneNum, Long locationId, Long parentId) {
         this.name = name;
         this.phoneNum = phoneNum;
         this.locationId = locationId;
-        this.parent_id = parent_id;
+        this.parentId = parentId;
     }
 
     public String getName() {
@@ -54,12 +56,12 @@ public class DepartmentCreateDTO {
         this.locationId = locationId;
     }
 
-    public Long getParent_id() {
-        return parent_id;
+    public Long getParentId() {
+        return parentId;
     }
 
-    public void setParent_id(Long parent_id) {
-        this.parent_id = parent_id;
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
     }
 
     public Long getId() {
@@ -70,4 +72,11 @@ public class DepartmentCreateDTO {
         this.id = id;
     }
 
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 }

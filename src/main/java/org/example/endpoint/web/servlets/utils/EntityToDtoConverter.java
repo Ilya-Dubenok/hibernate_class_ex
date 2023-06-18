@@ -6,6 +6,9 @@ import org.example.dao.entity.Department;
 import org.example.dao.entity.Location;
 import org.example.service.factory.DepartmentServiceFactory;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,14 +19,19 @@ public class EntityToDtoConverter {
             return new DepartmentCreateDTO();
         }
 
+        Location loc;
+        Department parId;
         DepartmentCreateDTO res = new DepartmentCreateDTO(
                 department.getName(),
                 department.getPhone(),
-                department.getLocation().getId(),
-                department.getParent() == null ? null : department.getParent().getId()
+                (loc = department.getLocation()) == null ? null : loc.getId(),
+                (parId = department.getParent()) == null ? null : parId.getId()
 
         );
         res.setId(department.getId());
+        res.setVersion(
+                getVersionFromDateTimeUpdated(department.getDateTimeUpdated())
+        );
         return res;
     }
 
@@ -35,6 +43,7 @@ public class EntityToDtoConverter {
         DepartmentDTO res = new DepartmentDTO();
 
         res.setId(department.getId());
+        res.setVersion(getVersionFromDateTimeUpdated(department.getDateTimeUpdated()));
         res.setName(department.getName());
         res.setPhoneNum(department.getPhone());
 
@@ -46,7 +55,7 @@ public class EntityToDtoConverter {
 
         Department parent = department.getParent();
         if (null != parent) {
-            res.setParent(department.getParent().getId());
+            res.setParentId(department.getParent().getId());
         }
 
         List<Department> children = DepartmentServiceFactory.getInstance().findChildren(department.getId());
@@ -54,6 +63,10 @@ public class EntityToDtoConverter {
         res.setChildren(childrenIdList);
         return res;
 
+    }
+
+    private static long getVersionFromDateTimeUpdated(LocalDateTime dateTimeUpdated) {
+        return ZonedDateTime.of(dateTimeUpdated, ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
 
