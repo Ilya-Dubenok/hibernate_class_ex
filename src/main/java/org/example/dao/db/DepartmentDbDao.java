@@ -3,19 +3,13 @@ package org.example.dao.db;
 import org.example.dao.api.IDepartmentDao;
 import org.example.dao.entity.Department;
 import org.example.dao.utils.HibernateUtil;
-import org.hibernate.exception.ConstraintViolationException;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
-import javax.persistence.TemporalType;
 import javax.persistence.criteria.*;
-import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimeZone;
 
 
 public class DepartmentDbDao implements IDepartmentDao {

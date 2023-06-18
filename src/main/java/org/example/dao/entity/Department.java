@@ -6,7 +6,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -21,7 +20,7 @@ public class Department {
 
 
     @CreationTimestamp
-    @Column(name = "create_stamp",columnDefinition = "")
+    @Column(name = "create_stamp")
     private LocalDateTime dateTimeCreated;
 
 

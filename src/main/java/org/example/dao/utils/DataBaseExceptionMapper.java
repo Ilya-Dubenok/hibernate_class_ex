@@ -5,8 +5,6 @@ import org.example.dao.entity.Location;
 import org.hibernate.PropertyValueException;
 import org.hibernate.exception.ConstraintViolationException;
 
-import javax.persistence.PersistenceException;
-
 public class DataBaseExceptionMapper {
 
 
