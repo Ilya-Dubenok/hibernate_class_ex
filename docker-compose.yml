@@ -1,0 +1,45 @@
+version: '3.1'
+
+services:
+
+  web:
+    image: tomcat:jre17
+    restart: always
+    depends_on:
+      - db
+    command:
+      - /bin/bash
+      - -c
+      - |
+        declare -x var3="hello"
+        printf "$var3"
+        export JAVA_OPTS=-DDB_HOST=db
+        export
+        catalina.sh run exit
+        
+
+
+
+
+    #    environment:
+#      - JAVA_OPTS=${JAVA_OPTS} -DDB_HOST=db
+    ports:
+      - "80:8080"
+    volumes:
+      - ./dep.war:/usr/local/tomcat/webapps/dep.war
+
+  db:
+    image: postgres
+    restart: always
+    container_name: db_cont
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=departments
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+      - ./0_init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+
+volumes:
+  db_volume:
+

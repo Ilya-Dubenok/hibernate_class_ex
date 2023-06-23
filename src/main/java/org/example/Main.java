@@ -1,7 +1,6 @@
 package org.example;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.example.core.dto.DepartmentCreateDTO;
 import org.example.core.dto.DepartmentUpdateDTO;
 import org.example.core.dto.LocationCreateDTO;
@@ -13,26 +12,21 @@ import org.example.service.api.ILocationService;
 import org.example.service.factory.DepartmentServiceFactory;
 import org.example.service.factory.LocationServiceFactory;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.TimeZone;
 import java.util.stream.Stream;
 
 public class Main {
-    public static void main(String[] args) throws JsonProcessingException {
+    public static void main(String[] args) {
 
         IDepartmentDao departmentDao = DepartmentDbDao.getInstance();
 
         IDepartmentService departmentService = DepartmentServiceFactory.getInstance();
 
         ILocationService instance = LocationServiceFactory.getInstance();
-//        instance.save(
-//                new LocationCreateDTO("Minsk")
-//        );
+        instance.save(
+                new LocationCreateDTO("Minsk")
+        );
 //        instance.save(
 //                new LocationCreateDTO("Gomel")
 //        );
@@ -122,14 +116,14 @@ public class Main {
 //        List<Department> res = departmentDao.findAll(
 //                List.of( "fakedepchild","","newFinance ")
 //        );
-//        System.out.println(res);
-
-        Department dep = departmentService.find(4L);
-
-
-        long epochMilli = ZonedDateTime.of(dep.getDateTimeUpdated(), ZoneId.systemDefault()).toInstant().toEpochMilli();
-
-        departmentService.update(4L,epochMilli, new DepartmentUpdateDTO("Finance","ff",3L,null));
+////        System.out.println(res);
+//
+//        Department dep = departmentService.find(4L);
+//
+//
+//        long epochMilli = ZonedDateTime.of(dep.getDateTimeUpdated(), ZoneId.systemDefault()).toInstant().toEpochMilli();
+//
+//        departmentService.update(4L,epochMilli, new DepartmentUpdateDTO("Finance","ff",3L,null));
 
 //        boolean hasChildren = departmentDao.hasChildren(18L);
 //        System.out.println(hasChildren);
