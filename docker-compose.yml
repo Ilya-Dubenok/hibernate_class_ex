@@ -11,10 +11,9 @@ services:
       - /bin/bash
       - -c
       - |
-        declare -x var3="hello"
-        printf "$var3"
         export JAVA_OPTS=-DDB_HOST=db
-        export
+        JAVA_OPTS="$${JAVA_OPTS} -DB_R=3"
+        echo $$JAVA_OPTS
         catalina.sh run exit
         
 
