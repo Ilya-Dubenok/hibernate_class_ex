@@ -11,8 +11,8 @@ services:
       - /bin/bash
       - -c
       - |
-        export JAVA_OPTS=-DDB_HOST=db
-        JAVA_OPTS="$${JAVA_OPTS} -DB_R=3"
+        export JAVA_OPTS=$${JAVA_OPTS} -DDB_HOST=db
+        JAVA_OPTS="${JAVA_OPTS} -DB_R=3"
         echo $$JAVA_OPTS
         catalina.sh run exit
         
